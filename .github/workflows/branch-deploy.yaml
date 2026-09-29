@@ -15,9 +15,6 @@ jobs:
   branch-deploy:
     name: Branch Deploy
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
     environment:
       name: prod
       deployment: false
