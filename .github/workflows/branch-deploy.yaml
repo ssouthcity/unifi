@@ -1,0 +1,76 @@
+name: Branch Deploy
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  pull-requests: write
+  deployments: write
+  contents: write
+  checks: read
+  statuses: read
+
+jobs:
+  branch-deploy:
+    name: Branch Deploy
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    environment:
+      name: prod
+      deployment: false
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_ENDPOINT_URL_S3: ${{ secrets.AWS_ENDPOINT_URL_S3 }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      UNIFI_API_KEY: ${{ secrets.UNIFI_API_KEY }}
+      UNIFI_CLOUD_CONNECTOR: ${{ secrets.UNIFI_CLOUD_CONNECTOR }}
+    defaults:
+      run:
+        shell: "nix develop --impure -c bash -e {0}"
+    steps:
+      - name: Branch Deploy
+        id: branch-deploy
+        uses: github/branch-deploy@97edad089bbbe0c0ad13db7bf9ac085eaa47e255 # v12.0.1
+        with:
+          trigger: ".apply"
+          noop_trigger: ".plan"
+          reaction: "rocket"
+          environment: "prod"
+          sticky_locks: true
+
+      - if: ${{ steps.branch-deploy.outputs.continue == 'true' }}
+        name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.branch-deploy.outputs.sha }}
+          persist-credentials: false
+
+      - if: ${{ steps.branch-deploy.outputs.continue == 'true' }}
+        name: Nix Flake
+        uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - if: ${{ steps.branch-deploy.outputs.continue == 'true' }}
+        name: Nix Flake
+        uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - if: ${{ steps.branch-deploy.outputs.continue == 'true' }}
+        name: Tofu Init
+        run: |
+          tofu init -input=false
+
+      - if: ${{ steps.branch-deploy.outputs.continue == 'true' && steps.branch-deploy.outputs.noop == 'true' }}
+        name: Tofu Plan
+        run: |
+          tofu plan -input=false -no-color -compact-warnings
+
+      - if: ${{ steps.branch-deploy.outputs.continue == 'true' && steps.branch-deploy.outputs.noop != 'true' }}
+        name: Tofu Apply
+        run: |
+          tofu apply -input=false -no-color -compact-warnings
