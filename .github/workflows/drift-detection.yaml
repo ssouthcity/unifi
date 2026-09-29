@@ -9,9 +9,18 @@ jobs:
   drift:
     name: Drift Detection
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     environment:
       name: prod
       deployment: false
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_ENDPOINT_URL_S3: ${{ secrets.AWS_ENDPOINT_URL_S3 }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      UNIFI_API_KEY: ${{ secrets.UNIFI_API_KEY }}
+      UNIFI_CLOUD_CONNECTOR: ${{ secrets.UNIFI_CLOUD_CONNECTOR }}
     defaults:
       run:
         shell: "nix develop --impure -c bash -e {0}"
