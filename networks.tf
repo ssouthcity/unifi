@@ -94,3 +94,17 @@ resource "unifi_network" "storage" {
     stop    = "10.0.50.254"
   }
 }
+
+resource "unifi_network" "check" {
+  name   = "Check"
+  subnet = "10.0.60.1/24"
+  vlan   = 60
+
+  firewall_zone_id = data.unifi_firewall_zone.internal.id
+
+  dhcp_server = {
+    enabled = true
+    start   = "10.0.60.6"
+    stop    = "10.0.60.254"
+  }
+}
