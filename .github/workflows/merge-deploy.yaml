@@ -35,6 +35,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       UNIFI_API_KEY: ${{ secrets.UNIFI_API_KEY }}
       UNIFI_CLOUD_CONNECTOR: ${{ secrets.UNIFI_CLOUD_CONNECTOR }}
+      TF_VAR_homelab_wireguard_private_key: ${{ secrets.TF_VAR_homelab_wireguard_private_key }}
     defaults:
       run:
         shell: "nix develop --impure -c bash -e {0}"
