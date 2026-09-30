@@ -70,4 +70,4 @@ jobs:
       - if: ${{ steps.branch-deploy.outputs.continue == 'true' && steps.branch-deploy.outputs.noop != 'true' }}
         name: Tofu Apply
         run: |
-          tofu apply -input=false -no-color -compact-warnings
+          tofu apply -input=false -auto-approve -no-color -compact-warnings

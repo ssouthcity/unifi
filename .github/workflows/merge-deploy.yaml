@@ -57,4 +57,4 @@ jobs:
 
       - name: Tofu Apply
         run: |
-          tofu apply -input=false -no-color -compact-warnings
+          tofu apply -input=false -auto-approve -no-color -compact-warnings
